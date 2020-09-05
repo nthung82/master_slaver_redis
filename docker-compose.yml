@@ -1,0 +1,30 @@
+version: '3.2'
+services:
+    master:
+        image: redis
+        volumes:
+            - ./server1/redis.conf:/data/redis.conf
+        command: [ "redis-server", "/data/redis.conf"]
+        ports:
+            - 4027:6379
+        networks:
+            redis-networks:
+                ipv4_address: 172.27.1.9
+    slave:
+        image: redis
+        command: redis-server /data/redis.conf --slaveof master 6379 
+        volumes:
+            - ./server2/redis.conf:/data/redis.conf
+        ports:
+            - 4026:6380
+        depends_on:
+            - master
+        networks:
+            redis-networks:
+                ipv4_address: 172.27.1.8
+networks:
+  redis-networks:
+    ipam:
+    #driver: bridge
+        config:
+            - subnet: 172.27.0.0/16
